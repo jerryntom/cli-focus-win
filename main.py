@@ -10,6 +10,35 @@ rounds_to_long_break = 4
 rounds_elapsed = 0
 task_title = "Task title"
 menu_focus_option = 0
+progress_bar_elements = ['.'] * 20
+progress_bar_pos = 0
+
+
+def progress_bar(time_elapsed, time_diff_secs,  session_time_secs):
+    global progress_bar_elements, progress_bar_pos
+
+    progress_bar_part = session_time_secs / 20
+
+    print('[', end="")
+    for char in progress_bar_elements:
+        print(char, end="")
+    print(']')
+
+    if (time_elapsed // progress_bar_part) >= progress_bar_pos and progress_bar_pos <= 19:
+        progress_bar_elements[progress_bar_pos] = u'█'
+        progress_bar_pos += 1
+
+    if progress_bar_pos < 19:
+        if time_diff_secs % 2 == 0:
+            progress_bar_elements[progress_bar_pos] = u'█'
+        else:
+            progress_bar_elements[progress_bar_pos] = '.'
+
+
+def err_handler(error_caption, sleep_time):
+    print(error_caption)
+    time.sleep(sleep_time)
+    system('cls')
 
 
 def change_task_title():
@@ -21,13 +50,10 @@ def change_task_title():
 
 
 def break_focus(type_of_break):
-    global menu_focus_option, break_time
+    global menu_focus_option, break_time, progress_bar_elements, progress_bar_pos
 
     start_time = time.localtime()
     break_time_secs = break_time * 60
-    progress_bar = ['.'] * 20
-    progress_bar_pos = 0
-    progress_bar_part = break_time_secs / 20
 
     while True:
         now_time = time.localtime()
@@ -48,21 +74,7 @@ def break_focus(type_of_break):
         else:
             print(f"Time to finish break: {time_diff_minutes}:{time_diff_secs}")
 
-        print('[', end="")
-        for char in progress_bar:
-            print(char, end="")
-        print(']')
-
-        if (time_elapsed // progress_bar_part) >= progress_bar_pos and progress_bar_pos <= 19:
-            progress_bar[progress_bar_pos] = u'█'
-            progress_bar_pos += 1
-
-        if progress_bar_pos < 19:
-            if time_diff_secs % 2 == 0:
-                progress_bar[progress_bar_pos] = u'█'
-            else:
-                progress_bar[progress_bar_pos] = '.'
-
+        progress_bar(time_elapsed, time_diff_secs, break_time_secs)
         time.sleep(1)
 
         if time_diff_minutes == 0 and time_diff_secs == 0:
@@ -72,12 +84,13 @@ def break_focus(type_of_break):
                 print("1. Focus session")
                 print("2. Abort")
                 winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+                progress_bar_elements = ['.'] * 20
+                progress_bar_pos = 0
 
                 try:
                     menu_focus_option = int(input("Option: "))
                 except ValueError:
-                    print("Incorrect option!")
-                    time.sleep(0.5)
+                    err_handler("Incorrect option", 0.5)
                     continue
 
                 if menu_focus_option == 1:
@@ -94,29 +107,21 @@ def break_focus(type_of_break):
                             elif menu_focus_option == 2:
                                 focus_on_task()
                             else:
-                                print("Incorrect option!")
-                                time.sleep(0.5)
-                                system('cls')
+                                err_handler("Incorrect option", 0.5)
                         except ValueError:
-                            print("Incorrect option!")
-                            time.sleep(0.5)
-                            system('cls')
+                            err_handler("Incorrect option", 0.5)
                 elif menu_focus_option == 2:
                     print_menu()
                 else:
-                    print("Incorrect option!")
-                    time.sleep(0.5)
+                    err_handler("Incorrect option", 0.5)
                     continue
 
 
 def focus_on_task():
-    global rounds_elapsed, rounds_to_long_break, menu_focus_option, break_time
+    global rounds_elapsed, rounds_to_long_break, menu_focus_option, break_time, progress_bar_elements, progress_bar_pos
 
     start_time = time.localtime()
     work_time_secs = work_time * 60
-    progress_bar = ['.'] * 20
-    progress_bar_pos = 0
-    progress_bar_part = work_time_secs / 20
 
     while True:
         now_time = time.localtime()
@@ -134,27 +139,10 @@ def focus_on_task():
         else:
             print(f"Time to finish: {time_diff_minutes}:{time_diff_secs}")
 
-        print('[', end="")
-        for char in progress_bar:
-            print(char, end="")
-        print(']')
-
-        if (time_elapsed // progress_bar_part) >= progress_bar_pos and progress_bar_pos <= 19:
-            progress_bar[progress_bar_pos] = u'█'
-            progress_bar_pos += 1
-
-        if progress_bar_pos < 19:
-            if time_diff_secs % 2 == 0:
-                progress_bar[progress_bar_pos] = u'█'
-            else:
-                progress_bar[progress_bar_pos] = '.'
-
+        progress_bar(time_elapsed, time_diff_secs, work_time_secs)
         time.sleep(1)
 
         if time_diff_minutes == 0 and time_diff_secs == 0:
-            rounds_elapsed += 1
-            progress_bar_pos = 0
-
             while True:
                 system('cls')
                 print("Focus session is over! Enjoy your free time!")
@@ -162,12 +150,13 @@ def focus_on_task():
                 print("2. Focus session")
                 print("3. Abort")
                 winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+                progress_bar_elements = ['.'] * 20
+                progress_bar_pos = 0
 
                 try:
                     menu_focus_option = int(input("Option: "))
                 except ValueError:
-                    print("Incorrect option!")
-                    time.sleep(0.5)
+                    err_handler("Incorrect option", 0.5)
                     continue
 
                 if menu_focus_option == 1:
@@ -186,9 +175,10 @@ def focus_on_task():
                     rounds_elapsed = 0
                     print_menu()
                 else:
-                    print("Incorrect option!")
-                    time.sleep(0.5)
+                    err_handler("Incorrect option", 0.5)
                     continue
+            else:
+                time.sleep(0.5)
 
 
 def config():
@@ -211,8 +201,7 @@ def config():
         try:
             config_option = int(input("Option: "))
         except ValueError:
-            print("Incorrect value!")
-            time.sleep(0.5)
+            err_handler("Incorrect option", 0.5)
             continue
 
         if config_option == 1:
@@ -221,74 +210,55 @@ def config():
                 try:
                     work_time = int(input("Please input work time (minutes):"))
                     if work_time <= 0:
-                        print("Time has to be greater than 0!")
-                        time.sleep(1)
-                        system('cls')
+                        err_handler("Time has to be greater than 0!", 0.5)
                         continue
                     break
                 except ValueError:
-                    print("Incorrect value!")
-                    time.sleep(1)
-                    system('cls')
+                    err_handler("Time has to be greater than 0!", 0.5)
         elif config_option == 2:
             system('cls')
             while True:
                 try:
                     break_time = int(input("Please input break time (minutes):"))
                     if break_time <= 0:
-                        print("Time has to be greater than 0!")
-                        time.sleep(1)
-                        system('cls')
+                        err_handler("Time has to be greater than 0!", 0.5)
                         continue
                     break
                 except ValueError:
-                    print("Incorrect value!")
-                    time.sleep(1)
-                    system('cls')
+                    err_handler("Incorrect value!", 0.5)
         elif config_option == 3:
             system('cls')
             while True:
                 try:
                     long_break_time = int(input("Please input long break time (minutes):"))
                     if long_break_time <= 0:
-                        print("Time has to be greater than 0!")
-                        time.sleep(1)
-                        system('cls')
+                        err_handler("Time has to be greater than 0!", 0.5)
                         continue
                     break
                 except ValueError:
-                    print("Incorrect value!")
-                    time.sleep(1)
-                    system('cls')
+                    err_handler("Incorrect value!", 0.5)
         elif config_option == 4:
             system('cls')
             while True:
                 try:
                     rounds_to_long_break = int(input("Please input amount of rounds to long break:"))
                     if rounds_to_long_break <= 0:
-                        print("Amount of rounds has to be greater than 0!")
-                        time.sleep(1)
-                        system('cls')
+                        err_handler("Amount of rounds has to be greater than 0!", 0.5)
                         continue
                     break
                 except ValueError:
-                    print("Incorrect value!")
-                    time.sleep(1)
-                    system('cls')
+                    err_handler("Incorrect value!", 0.5)
         elif config_option == 5:
             system('cls')
             task_title = input("Please input title of task:")
         elif config_option == 6:
             return 0
         else:
-            print("Incorrect option!")
-            time.sleep(0.5)
+            err_handler("Incorrect option!", 0.5)
             continue
 
 
 def print_menu():
-    menu_option = 0
-
     while True:
         try:
             system('cls')
@@ -298,8 +268,8 @@ def print_menu():
             print('3. Exit')
             menu_option = int(input("Option:"))
         except ValueError:
-            print("Incorrect option!")
-
+            err_handler("Incorrect value!", 0.5)
+            continue
         if menu_option == 1:
             system('cls')
             focus_on_task()
@@ -309,8 +279,7 @@ def print_menu():
         elif menu_option == 3:
             exit(-1)
         else:
-            print("Incorrect option!")
-            time.sleep(0.5)
+            err_handler("Incorrect option!", 0.5)
             continue
 
 
